@@ -32,7 +32,7 @@ echo Chromium folder found.
 echo.
 echo [4/4] Building WiFi Connector...
 
-python -m PyInstaller --noconfirm --clean --onedir --console --name WiFiConnector --collect-all playwright --collect-all pystray --collect-all PIL --collect-all keyring --collect-all plyer --add-data "%BROWSER_DIR%;playwright\driver\package\.local-browsers" main.py
+python -m PyInstaller --noconfirm --clean --onedir --windowed --name WiFiConnector --collect-all playwright --collect-all pystray --collect-all PIL --collect-all keyring --collect-all plyer --add-data "%BROWSER_DIR%;playwright\driver\package\.local-browsers" main.py
 
 if errorlevel 1 goto error
 
