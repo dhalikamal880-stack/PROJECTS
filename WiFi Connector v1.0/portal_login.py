@@ -4,7 +4,7 @@ import time
 import keyring
 
 from app_config import SERVICE_NAME, DEFAULT_PORTAL_URL
-from network import has_internet
+from network import has_internet, discover_captive_portal_url
 
 
 def get_portal_urls(profile):
@@ -47,12 +47,23 @@ def automatic_portal_login(profile):
             "This profile has no saved username or password. Open Wi-Fi Profiles."
         )
 
+    # Try the URL discovered from the current network first. Captive portal
+    # addresses can change between connections, so saved URLs are only fallback.
+    discovered_url = discover_captive_portal_url()
+    candidate_urls = []
+    if discovered_url:
+        candidate_urls.append(discovered_url)
+
+    for saved_url in get_portal_urls(profile):
+        if saved_url not in candidate_urls:
+            candidate_urls.append(saved_url)
+
     with sync_playwright() as playwright:
         browser = playwright.chromium.launch(headless=False)
         page = browser.new_page()
 
         try:
-            for url in get_portal_urls(profile):
+            for url in candidate_urls:
                 try:
                     page.goto(
                         url,

@@ -19,7 +19,7 @@ from app_config import (
 )
 
 from profile_reader import load_profiles
-from network import get_wifi_status, has_internet
+from network import get_wifi_status, has_internet, discover_captive_portal_url
 from portal_login import automatic_portal_login, get_portal_urls
 
 
@@ -196,10 +196,22 @@ class WiFiTrayApp:
             )
             return
 
-        urls = get_portal_urls(profile)
+        # Prefer the portal URL discovered from this connection. The address
+        # can change, so saved URLs are fallback options only.
+        current_url = discover_captive_portal_url()
 
+        if current_url:
+            webbrowser.open(current_url)
+            return
+
+        urls = get_portal_urls(profile)
         if urls:
             webbrowser.open(urls[0])
+        else:
+            self.notify(
+                "WiFi Connector",
+                "Could not detect the portal URL. Please check the saved profile.",
+            )
 
     def retry_login(self, _icon=None, _item=None):
         connected, ssid = get_wifi_status()
